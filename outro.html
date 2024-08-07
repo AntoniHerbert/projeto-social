@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela em Branco com Botões</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: white; /* Mantendo fundo branco */
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin-bottom: 20px; /* Espaço entre o título e os botões */
+            font-size: 24px; /* Tamanho da fonte do título */
+        }
+
+        .botao {
+            width: 100px;
+            height: 100px;
+            border-radius: 15px;
+            background-color: lightblue; /* Azul claro */
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .botao:hover {
+            background-color: deepskyblue; /* Cor ao passar o mouse */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .linha-inferior {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .quadro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white; /* Quadro em branco opaco */
+            z-index: 10; /* Fica acima de outros elementos */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .retorno {
+            width: 200px; /* Largura maior que a altura */
+            height: 50px; /* Altura do botão */
+            margin-top: 20px; /* Espaço acima do botão */
+            background-color: lightblue; /* Azul claro */
+            color: white;
+            border: none;
+            border-radius: 15px; /* Cantos arredondados */
+            font-size: 16px;
+            cursor: pointer;
+            position: absolute; /* Posição absoluta */
+            top: 20px; 
+        }
+
+        .retorno:hover {
+            background-color: deepskyblue; /* Cor ao passar o mouse */
+        }
+
+        .mensagem {
+            margin-top: 20px; /* Espaço entre o botão e a string */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Matemática</h1> <!-- Título adicionado -->
+        <button class="botao" onclick="tabuada()">Tabuada</button> <!-- Botão alterado -->
+        <div class="linha-inferior">
+            <button class="botao" onclick="expressaoNumerica()">Expressão numérica</button>
+            <button class="botao" onclick="expressaoAlgebrica()">Expressao Algébrica</button>
+        </div>
+    </div>
+
+    <script>
+        function tabuada() {
+            // Função vazia chamada ao clicar no botão
+
+            // Função para gerar um número aleatório inteiro entre min e max
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Função para gerar um caractere aleatório
+function getRandomOperator() {
+    const operators = ["+", "-", "*", ":"];
+    return operators[getRandomInt(0, operators.length - 1)];
+}
+
+// Gera dois números aleatórios e um operador
+const num1 = getRandomInt(1, 100); // Ajuste o intervalo conforme necessário
+const num2 = getRandomInt(1, 100); // Ajuste o intervalo conforme necessário
+const operator = getRandomOperator();
+
+// Calcula o resultado com base no operador gerado
+let result;
+switch (operator) {
+    case "+":
+        result = num1 + num2;
+        break;
+    case "-":
+        result = num1 - num2;
+        break;
+    case "*":
+        result = num1 * num2;
+        break;
+    case ":":
+        result = num2 !== 0 ? (num1 / num2) : "Erro: Divisão por zero"; // Verifica divisão por zero
+        break;
+    default:
+        result = "Operador inválido";
+}
+
+console.log(`Números: ${num1}, ${num2}`);
+console.log(`Operador: ${operator}`);
+console.log(`Resultado: ${result}`);
+
+const quadro = document.createElement('div');
+            quadro.className = 'quadro';
+
+            // Adicionar o botão de retorno
+            const botaoRetorno = document.createElement('button');
+            botaoRetorno.className = 'botao retorno';
+            botaoRetorno.innerText = 'Retorno';
+            botaoRetorno.onclick = function() {
+                document.body.removeChild(quadro); // Remover o quadro
+            };
+
+            // Adicionar a string abaixo do botão de retorno
+            const mensagem = document.createElement('p');
+            mensagem.innerText = 'Aqui está a string que você pediu!';
+            quadro.appendChild(botaoRetorno);
+            quadro.appendChild(mensagem);
+
+            // Adicionar o quadro ao corpo
+            document.body.appendChild(quadro);
+            console.log('Botão clicado!');
+
+
+        }
+
+        function expressaoNumerica(){
+            
+        }
+
+        function expressaoAlgebrica(){
+
+        }
+
+    </script>
+</body>
+</html>
