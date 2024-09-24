@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela em Branco com Botões</title>
+    <style>
+        .operador-mais {
+    color: blue;
+}
+
+.operador-multiplicacao {
+    color: blue;
+}
+
+.operador-menor {
+    color: red;
+}
+
+.operador-divisao {
+    color: red;
+}
+
+
+        .mensagem {
+            margin-top: 20px;
+            font-size: 20px; /* Aumenta o tamanho da fonte */
+            color: #333; /* Cor do texto da mensagem */
+            font-weight: bold; /* Torna o texto em negrito */
+            border: 2px solid #ccc; /* Adiciona uma borda ao redor da mensagem */
+            border-radius: 10px; /* Arredonda os cantos da borda */
+            padding: 10px 20px; /* Adiciona preenchimento interno */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adiciona sombra ao redor da mensagem */
+            background-color: #f9f9f9; /* Cor de fundo leve para contraste */
+        }
+
+        input[type="text"] {
+            font-size: 18px; /* Aumenta o tamanho da fonte */
+            width: 80px; /* Aumenta a largura do input */
+            height: 30px; /* Ajusta a altura do input */
+            border: 2px solid #aaa; /* Borda clara */
+            border-radius: 5px; /* Borda arredondada */
+            padding: 5px; /* Preenchimento interno */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+            outline: none; /* Remove o contorno padrão */
+            transition: border-color 0.3s, box-shadow 0.3s; /* Transição suave */
+        }
+
+        input[type="text"]:focus {
+            border-color: deepskyblue; /* Cor da borda ao focar */
+            box-shadow: 0 0 5px rgba(0, 0, 255, 0.5); /* Sombra ao focar */
+        }
+
+       
+
+
+
+
+/* Área quadrada como rodapé */
+#areaQuadrada {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px; /* Altura do rodapé */
+    background-color: lightgray; /* Fundo para o rodapé */
+    display: flex;
+    align-items: center; /* Centraliza verticalmente o conteúdo */
+    justify-content: flex-start; /* Alinha o conteúdo à esquerda */
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 15;
+    border-radius: 10px 10px 0 0; /* Bordas arredondadas no topo */
+    transition: background-color 0.3s ease;
+}
+
+/* Estilo da mensagem no rodapé */
+#mensagemRodape {
+    font-size: 18px;
+    margin-right: 20px;
+    font-weight: bold;
+}
+
+/* Cores mais claras para o rodapé */
+@keyframes reflexoMetalico {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+#areaQuadrada.rodape-verde {
+    background-color: lightgreen; /* Verde claro */
+    position: absolute;
+    overflow: hidden; /* Evita que o reflexo transborde */
+}
+
+#areaQuadrada.rodape-verde::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(
+        120deg, 
+        rgba(255, 255, 255, 0) 0%, 
+        rgba(255, 255, 255, 0.4) 50%, 
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: reflexoMetalico 2s ease-in-out forwards;
+}
+#areaQuadrada.rodape-vermelho {
+    background-color: #f08080; /* Vermelho claro */
+}
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: white; /* Mantendo fundo branco */
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin-bottom: 20px; /* Espaço entre o título e os botões */
+            font-size: 24px; /* Tamanho da fonte do título */
+        }
+
+        .botao {
+            width: 100px;
+            height: 100px;
+            border-radius: 15px;
+            background-color: lightblue; /* Azul claro */
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .botao:hover {
+            background-color: deepskyblue; /* Cor ao passar o mouse */
+        }
+
+        #botaoConfere {
+    position: absolute;
+    right: 20px;
+    width: 150px;
+    height: 50px;
+    background-color: green; /* Cor verde por padrão */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#botaoConfere:hover {
+    background-color: darkgreen; /* Cor verde escuro ao passar o mouse */
+}
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .linha-inferior {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .quadro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white; /* Quadro em branco opaco */
+            z-index: 10; /* Fica acima de outros elementos */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .retorno {
+            width: 200px; /* Largura maior que a altura */
+            height: 50px; /* Altura do botão */
+            margin-top: 20px; /* Espaço acima do botão */
+            background-color: lightblue; /* Azul claro */
+            color: white;
+            border: none;
+            border-radius: 15px; /* Cantos arredondados */
+            font-size: 16px;
+            cursor: pointer;
+            position: absolute; /* Posição absoluta */
+            top: 20px; 
+        }
+
+        .retorno:hover {
+            background-color: deepskyblue; /* Cor ao passar o mouse */
+        }
+
+        .mensagem {
+            margin-top: 20px; /* Espaço entre o botão e a string */
+        }
+
+        h1 {
+            font-size: 48px;
+            font-family: 'Arial', sans-serif;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #confetti{
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            top: 0px;
+            left: 0px;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px); /* Aumente o deslocamento para um salto maior */
+    }
+    60% {
+        transform: translateY(-10px); /* Aumente o deslocamento para um salto maior */
+    }
+
+}
+
+h1 span {
+            display: inline-block; /* Necessário para a animação */
+        }
+
+       
+
+        .bounce-animation {
+            display: inline-block;
+            animation: bounce 1s ease-in-out forwards; /* Aplica a animação */
+        }
+
+        /* Adiciona diferentes delays para criar o efeito de onda */
+        h1 span:nth-child(1) { animation-delay: 0s; }
+        h1 span:nth-child(2) { animation-delay: 0.1s; }
+        h1 span:nth-child(3) { animation-delay: 0.2s; }
+        h1 span:nth-child(4) { animation-delay: 0.3s; }
+        h1 span:nth-child(5) { animation-delay: 0.4s; }
+        h1 span:nth-child(6) { animation-delay: 0.5s; }
+        h1 span:nth-child(7) { animation-delay: 0.6s; }
+        h1 span:nth-child(8) { animation-delay: 0.7s; }
+        h1 span:nth-child(9) { animation-delay: 0.8s; }
+        h1 span:nth-child(10) { animation-delay: 0.9s; }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05); /* Centraliza verticalmente */
+        
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+.botao.errou {
+    animation: shake 0.5s ease-in-out;
+}
+.proximo {
+    animation: pulse 1.5s infinite;
+}
+
+    </style>
+    
+
+</head>
+<body>
+    <div class="container">
+        <h1>
+                <span>M</span>
+                <span>a</span>
+                <span>t</span>
+                <span>e</span>
+                <span>m</span>
+                <span>á</span>
+                <span>t</span>
+                <span>i</span>
+                <span>c</span>
+                <span>a</span>
+        </h1> <!-- Título adicionado -->
+        <button class="botao" onclick="tabuada()">Tabuada</button> <!-- Botão alterado -->
+        <div class="linha-inferior">
+            <button class="botao" onclick="expressaoNumerica()">Expressão numérica</button>
+            <button class="botao" onclick="expressaoAlgebrica()">Expressao Algébrica</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function triggerAnimation() {
+            const spans = document.querySelectorAll('h1 span');
+            spans.forEach(span => {
+                span.classList.remove('bounce-animation'); // Remove a animação
+                span.classList.add('bounce-animation'); // Reaplica a animação
+            });
+        }
+
+        // Aciona a animação imediatamente e a cada 10 segundos
+        setInterval(triggerAnimation, 10000);
+
+    
+});
+
+let ou = true;
+        function tabuada() {
+            // Função vazia chamada ao clicar no botão
+
+            // Função para gerar um número aleatório inteiro entre min e max
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Função para gerar um caractere aleatório
+function getRandomOperator() {
+    const operators = ["+", "-", "X", "÷"];
+    return operators[getRandomInt(0, operators.length - 1)];
+}
+
+// Gera dois números aleatórios e um operador
+const num1 = getRandomInt(1, 10); // Ajuste o intervalo conforme necessário
+const num2 = getRandomInt(1, 10); // Ajuste o intervalo conforme necessário
+const operator = getRandomOperator();
+
+// Calcula o resultado com base no operador gerado
+let result;
+switch (operator) {
+    case "+":
+        result = num1 + num2;
+        break;
+    case "-":
+        result = num1 - num2;
+        break;
+    case "X":
+        result = num1 * num2;
+        break;
+    case "÷":
+        result = num2 !== 0 ? (num1 / num2) : "Erro: Divisão por zero"; // Verifica divisão por zero
+        break;
+    default:
+        result = "Operador inválido";
+}
+
+const quadro = document.createElement('div');
+            quadro.className = 'quadro';
+
+            // Adicionar o botão de retorno
+            const botaoRetorno = document.createElement('button');
+            botaoRetorno.className = 'botao retorno';
+            botaoRetorno.innerText = 'Retorno';
+            botaoRetorno.onclick = function() {
+                document.body.removeChild(quadro);
+                document.body.removeChild(areaQuadrada);  // Remover o quadro
+            };
+
+            const inputNumerico = document.createElement('input');
+            inputNumerico.type = 'text';
+            inputNumerico.id = 'resultadoEntrada'; // ID para acesso posterior
+             // Permite valores decimais, se necessário
+
+// Define um valor padrão ou deixa vazio
+            inputNumerico.placeholder = '?';
+
+            // Adicionar a string abaixo do botão de retorno
+            const mensagem = document.createElement('p');
+            let operadorEstilizado;
+    switch (operator) {
+        case "+":
+            operadorEstilizado = `<span class="operador-mais">${operator}</span>`;
+            break;
+        case "X":
+            operadorEstilizado = `<span class="operador-multiplicacao">${operator}</span>`;
+            break;
+        case "-":
+            operadorEstilizado = `<span class="operador-menor">${operator}</span>`;
+            break;
+        case "÷":
+            operadorEstilizado = `<span class="operador-divisao">${operator}</span>`;
+            break;
+    }
+
+    mensagem.innerHTML = `${num1} ${operadorEstilizado} ${num2} = `;
+            quadro.appendChild(botaoRetorno);
+            mensagem.appendChild(inputNumerico);
+            quadro.appendChild(mensagem);
+
+            const areaQuadrada = document.createElement('div');
+            areaQuadrada.id = 'areaQuadrada';
+
+            const mensagemRodape = document.createElement('p');
+    mensagemRodape.id = 'mensagemRodape';
+    mensagemRodape.innerText = ''; // Inicia sem texto
+
+            botaoConfere = document.createElement('button');
+            botaoConfere.id = 'botaoConfere';
+            botaoConfere.innerText = 'Verificar';
+
+            
+
+            botaoConfere.onclick = function(){
+                
+
+                input = inputNumerico.value;
+
+            numeroDigitado = parseFloat(input);
+                if (result == numeroDigitado){
+                    let canvas = document.createElement('canvas');
+                    canvas.id = 'confetti';
+                    quadro.appendChild(canvas);
+                    mensagemRodape.innerText = 'Acertou!';
+                    mensagemRodape.style.color = 'green';
+                    areaQuadrada.style.backgroundColor = 'lightgreen';
+                    areaQuadrada.style.position = 'absolute';
+                    areaQuadrada.style.overflow = 'hidden';
+                    botaoConfere.innerText = 'Próximo';
+                    botaoConfere.style.backgroundColor = 'green';
+                    if (ou == true){
+                        const  jsConfetti = new JSConfetti();
+                    jsConfetti.addConfetti();
+                    ou = false;
+                    }else{
+                        areaQuadrada.classList.add('rodape-verde');
+                        ou = true;
+                    }
+                    
+                    botaoConfere.classList.add('proximo');
+                    botaoConfere.onclick = function() {
+                document.body.removeChild(quadro);
+                document.body.removeChild(areaQuadrada);
+                tabuada();
+            };
+                
+                }else {
+                    areaQuadrada.classList.remove('rodape-verde');
+                    mensagemRodape.innerText = 'Errou!';
+                    areaQuadrada.classList.add('rodape-vermelho');
+                    mensagemRodape.style.color = 'red';
+                    botaoConfere.style.backgroundColor = 'red';
+                    botaoConfere.innerText = 'Verificar';
+                    botaoConfere.classList.add( 'botao','errou');
+                }
+            };
+
+            areaQuadrada.appendChild(mensagemRodape);
+
+            areaQuadrada.appendChild(botaoConfere);
+
+            // Adicionar o quadro ao corpo
+            document.body.appendChild(quadro);
+            document.body.appendChild(areaQuadrada);
+
+        }
+
+        function expressaoNumerica(){
+            
+            // Função para criar uma expressão numérica aleatória
+            function gerarExpressao() {
+    const operadores = ['+', '-', '*', '/'];
+    const gerarNumero = () => Math.floor(Math.random() * 10) + 1;
+    const gerarOperador = () => operadores[Math.floor(Math.random() * operadores.length)];
+
+    // Gera uma subexpressão com parênteses, colchetes e chaves
+    let parteParenteses = `(${gerarNumero()} ${gerarOperador()} ${gerarNumero()})`;
+    let parteColchetes = `[${gerarNumero()} ${gerarOperador()} ${parteParenteses}]`;
+    let parteChaves = `{${gerarNumero()} ${gerarOperador()} ${parteColchetes}}`;
+
+    return parteChaves;
+}
+
+// Função para corrigir a expressão numérica
+function corrigirExpressao(expressao) {
+    const regexParentheses = /\(([^()]+)\)/;  // Expressão regular para encontrar o nível mais interno de parênteses
+    const regexBrackets = /\[([^[\]]+)\]/;  // Expressão regular para encontrar colchetes
+    const regexBraces = /\{([^{}]+)\}/;     // Expressão regular para encontrar chaves
+
+    let passos = [];
+    let expAtual = expressao;
+
+    // Função auxiliar para avaliar expressões simples
+    function avaliarExpressaoSimples(expr) {
+    const operadores = /([+\-*/])/;
+    let tokens = expr.split(operadores).map(t => t.trim());
+
+    while (tokens.includes('*') || tokens.includes('/')) {
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i] === '*' || tokens[i] === '/') {
+                const operador = tokens[i];
+                const resultado = operador === '*' 
+                    ? Number(tokens[i - 1]) * Number(tokens[i + 1])
+                    : Number(tokens[i - 1]) / Number(tokens[i + 1]);
+                tokens.splice(i - 1, 3, resultado.toString());
+                break;
+            }
+        }
+    }
+
+    while (tokens.includes('+') || tokens.includes('-')) {
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i] === '+' || tokens[i] === '-') {
+                const operador = tokens[i];
+                const resultado = operador === '+'
+                    ? Number(tokens[i - 1]) + Number(tokens[i + 1])
+                    : Number(tokens[i - 1]) - Number(tokens[i + 1]);
+                tokens.splice(i - 1, 3, resultado.toString());
+                break;
+            }
+        }
+    }
+
+    return tokens[0]; // Expressão final resolvida
+}
+
+    // Função para gerar todas as formas possíveis
+    function gerarPassosPossiveis(exp, regex) {
+        let match;
+        let formas = [];
+
+        while ((match = exp.match(regex)) !== null) {
+            const subExp = match[1];
+            const avaliado = avaliarExpressaoSimples(subExp);
+            
+            // Gerar uma nova expressão com a parte avaliada
+            const novaExp = exp.replace(regex, avaliado);
+            formas.push(novaExp);
+
+            exp = exp.replace(subExp, avaliado); // Para continuar a simplificação
+        }
+
+        return formas;
+    }
+
+    // Passo 1: Resolver expressões entre parênteses
+    let passosParenteses = gerarPassosPossiveis(expAtual, regexParentheses);
+    passos.push(...passosParenteses);
+
+    // Passo 2: Resolver expressões entre colchetes
+    passosParenteses.forEach(exp => {
+        let passosColchetes = gerarPassosPossiveis(exp, regexBrackets);
+        passos.push(...passosColchetes);
+    });
+
+    // Passo 3: Resolver expressões entre chaves
+    passosParenteses.forEach(exp => {
+        let passosChaves = gerarPassosPossiveis(exp, regexBraces);
+        passos.push(...passosChaves);
+    });
+
+    return passos;
+}
+
+// Exemplo de uso
+let expressao = gerarExpressao();
+console.log("Expressão original: ", expressao);
+
+let passosCorrecao = corrigirExpressao(expressao);
+console.log("Passos de correção: ");
+passosCorrecao.forEach(passo => console.log(passo));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+        function expressaoAlgebrica(){
+
+            const quadro = document.createElement('div');
+            quadro.className = 'quadro';
+
+            // Adicionar o botão de retorno
+            const botaoRetorno = document.createElement('button');
+            botaoRetorno.className = 'botao retorno';
+            botaoRetorno.innerText = 'Retorno';
+            botaoRetorno.onclick = function() {
+                document.body.removeChild(quadro); // Remover o quadro
+            };
+
+            // Adicionar a string abaixo do botão de retorno
+            const mensagem = document.createElement('p');
+            mensagem.innerText = 'Aqui está a string que você pediu!';
+            quadro.appendChild(botaoRetorno);
+            quadro.appendChild(mensagem);
+
+            // Adicionar o quadro ao corpo
+            document.body.appendChild(quadro);
+            console.log('Botão clicado!');
+
+
+        }
+
+            function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomOperator() {
+    const operators = ['+', '-', '*', '/'];
+    return operators[getRandomInt(0, operators.length - 1)];
+}
+
+function getRandomVariable() {
+    const variables = ['x', 'y'];
+    return variables[getRandomInt(0, variables.length - 1)];
+}
+
+function getRandomElement() {
+    const elements = [getRandomInt(1, 10), getRandomVariable()];
+    return elements[getRandomInt(0, elements.length - 1)];
+}
+
+function generateExpression(numTerms) {
+    let expression = getRandomElement().toString();
+    
+    for (let i = 1; i < numTerms; i++) {
+        const operator = getRandomOperator();
+        const nextElement = getRandomElement();
+        expression += ` ${operator} ${nextElement}`;
+    }
+    
+    return expression;
+}
+
+// Exemplo de uso:
+const numTerms = getRandomInt(2, 10); // Número de termos na expressão
+const expression = generateExpression(numTerms);
+console.log(expression);
+
+const mathsteps = require('mathsteps');
+
+// Definir a equação
+let steps = mathsteps.solveEquation(expression);
+
+// Iterar sobre os passos
+steps.forEach((step, index) => {
+    console.log(`Passo ${index + 1}: ${step.oldEquation.ascii()} -> ${step.newEquation.ascii()}`);
+});
+
+
+        
+
+    </script>
+</body>
+</html>

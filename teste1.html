@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+    function generateRandomCoefficient() {
+        return Math.floor(Math.random() * 10) + 1; // Gera coeficientes entre 1 e 10
+    }
+    
+    function generateRandomOperator() {
+        const operators = ['+', '-', '*', '/'];
+        const randomIndex = Math.floor(Math.random() * operators.length);
+        return operators[randomIndex];
+    }
+    
+    function applyOperation(a, b, operator) {
+        switch (operator) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case '*': return a * b;
+            case '/': return a / b;
+            default: return a;
+        }
+    }
+    
+    function generateRandomTerm(variable) {
+        const includeVariable = Math.random() > 0.5; // 50% de chance de incluir a variável
+        const coefficient = generateRandomCoefficient();
+        return includeVariable ? `${coefficient} * ${variable}` : `${coefficient}`;
+    }
+    
+    function generateExpression(variable, targetValue) {
+        const termsCount = Math.floor(Math.random() * 5) + 1; // Gera de 1 a 5 termos
+        let expression = '';
+        let currentValue = targetValue;
+    
+        for (let i = 0; i < termsCount; i++) {
+            const operator = i === 0 ? '' : ` ${generateRandomOperator()} `;
+            const term = generateRandomTerm(variable);
+    
+            // Decide aleatoriamente se deve colocar parênteses
+            if (i > 0 && Math.random() > 0.5) {
+                // Decide aleatoriamente se deve aninhar parênteses
+                if (Math.random() > 0.5) {
+                    expression = `(${expression} ${operator} (${term}))`;
+                } else {
+                    expression = `(${expression}${operator}${term})`;
+                }
+            } else {
+                expression += `${operator}${term}`;
+            }
+    
+            // Ajuste o valor corrente com base na operação inversa do termo anterior
+            currentValue = applyOperation(currentValue, generateRandomCoefficient(), operator.trim());
+        }
+    
+        return `${expression} = ${targetValue}`;
+    }
+    
+    const variable = 'x';
+    const targetValue = Math.floor(Math.random() * 100) + 1; // Alvo entre 1 e 100
+    const randomExpression = generateExpression(variable, targetValue);
+    
+    console.log(randomExpression);
+    
+    </script>
+</body>
+</html>
