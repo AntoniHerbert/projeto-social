@@ -11,73 +11,58 @@ function gerarExpressao() {
     return parteChaves;
 }
 
-const resolverOperacao = (expr, idxOp) => {
-    const operadores = ["+", "-", "*", "/"];
-    const operador = expr[idxOp];
+const simbolos = ['+', '-', '*', '/'];
 
-    // Usando expressão regular para capturar números antes e depois do operador
-    const regex = /(\d+(\.\d+)?)\s*([\+\-\*\/])\s*(\d+(\.\d+)?)/;
-    const matchAntes = expr.slice(0, idxOp).match(/(\d+(\.\d+)?)(\s*[\+\-\*\/]\s*\d+(\.\d+)?)*$/);
-    const matchDepois = expr.slice(idxOp + 1).match(/^(\s*[\+\-\*\/]\s*\d+(\.\d+)?)+/);
+function generateSteps(str) {
+  // Remove todos os espaços em branco
+  const semEspacos = str.replace(/\s+/g, '');
+    const resultados = [];
+    
+    // Filtra os símbolos encontrados na string
+    const simbolosEncontrados = simbolos.filter(simbolo => semEspacos.includes(simbolo));
+    const totalSimbolosEncontrados = simbolosEncontrados.length;
 
-    // Extraindo os números antes e depois do operador
-    const numEsquerda = matchAntes ? matchAntes[1] : null;
-    const numDireita = matchDepois ? matchDepois[0].trim().split(' ')[1] : null;
+    // Gera todas as combinações possíveis de v e f
+    const totalCombinacoes = 1 << totalSimbolosEncontrados; // 2^totalSimbolosEncontrados
 
-    // Verifica se ambos os números são válidos
-    if (numEsquerda && numDireita) {
-        const resultado = eval(`${numEsquerda} ${operador} ${numDireita}`);
-        // Substitui a operação resolvida pela expressão com o resultado
-        return expr.slice(0, matchAntes.index) + resultado + expr.slice(idxOp + 1 + matchDepois[0].length);
-    } else {
-        console.log(`Operação inválida: ${numEsquerda} ${operador} ${numDireita}`);
-        return null; // Retorna null para indicar que a operação não foi realizada
-    }
-};
+    for (let i = 0; i < totalCombinacoes; i++) {
+        const copiaArray = Array.from(semEspacos);
+        
+        // Guarda as posições dos símbolos
+        const posicoes = simbolosEncontrados.map(simbolo => {
+            return Array.from(copiaArray.keys()).filter(k => copiaArray[k] === simbolo);
+        });
 
-// Função principal que percorre a expressão e gera as próximas etapas
-const corrigirExpressao = (expressao) => {
-    let passos = [];
-    let passoAtual = [expressao];
+        // Substitui de acordo com a tabela verdade
+        for (let j = 0; j < totalSimbolosEncontrados; j++) {
+            const substitui = (i & (1 << j)) !== 0; // Verifica se o bit j está setado
 
-    let limitePassos = 100; // Define um limite de passos para evitar loops infinitos
-    let passo = 0;
+            if (substitui) {
+                const posicoesDoSimbolo = posicoes[j];
+                for (let k = 0; k < posicoesDoSimbolo.length; k++) {
+                    // Ignora a ocorrência de acordo com a tabela verdade
+                    if (k === 0) continue; // Ignora a primeira ocorrência
 
-    while (passo < limitePassos) {
-        let novasExpressoes = [];
-
-        // Percorre cada expressão do passo atual
-        for (let expr of passoAtual) {
-            const operadores = ["+", "-", "*", "/"];
-
-            // Encontra os operadores na expressão
-            for (let i = 0; i < expr.length; i++) {
-                if (operadores.includes(expr[i])) {
-                    let novaExpr = resolverOperacao(expr, i);
-                    if (novaExpr !== null) { // Apenas adiciona expressões válidas
-                        novasExpressoes.push(novaExpr); // Adiciona a expressão resultante
-                    }
+                    // Substitui pelo índice
+                    copiaArray[posicoesDoSimbolo[k]] = j; // Usa o índice do símbolo
                 }
             }
         }
 
-        // Se não houver novas expressões, interrompe o loop
-        if (novasExpressoes.length === 0) {
-            break;
+        // Transforma a cópia em uma string e adiciona ao array de resultados
+        const resultadoFinal = copiaArray.join('');
+        if (!resultados.includes(resultadoFinal)) {
+            resultados.push(resultadoFinal);
         }
-
-        passos.push(novasExpressoes);
-        passoAtual = novasExpressoes;
-        passo++;
     }
 
-    return passos;
-};
+    return resultados;
+}
    
 
 // Exemplo de uso
 let expressao = gerarExpressao();
-let resultado = corrigirExpressao(expressao);
+let resultado = generateSteps(expressao, simbolos);
 
 // Exibindo os passos
 console.log("Expressão original:", expressao);
