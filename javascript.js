@@ -16,47 +16,39 @@ const simbolos = ['+', '-', '*', '/'];
 function generateSteps(str) {
   // Remove todos os espaços em branco
   const semEspacos = str.replace(/\s+/g, '');
-    const resultados = [];
+  const resultados = [];
+  
+  // Conta quantos símbolos são encontrados na string
+  const posicoesSimbolos = [];
     
-    // Filtra os símbolos encontrados na string
-    const simbolosEncontrados = simbolos.filter(simbolo => semEspacos.includes(simbolo));
-    const totalSimbolosEncontrados = simbolosEncontrados.length;
-
-    // Gera todas as combinações possíveis de v e f
-    const totalCombinacoes = 1 << totalSimbolosEncontrados; // 2^totalSimbolosEncontrados
-
-    for (let i = 0; i < totalCombinacoes; i++) {
-        const copiaArray = Array.from(semEspacos);
-        
-        // Guarda as posições dos símbolos
-        const posicoes = simbolosEncontrados.map(simbolo => {
-            return Array.from(copiaArray.keys()).filter(k => copiaArray[k] === simbolo);
-        });
-
-        // Substitui de acordo com a tabela verdade
-        for (let j = 0; j < totalSimbolosEncontrados; j++) {
-            const substitui = (i & (1 << j)) !== 0; // Verifica se o bit j está setado
-
-            if (substitui) {
-                const posicoesDoSimbolo = posicoes[j];
-                for (let k = 0; k < posicoesDoSimbolo.length; k++) {
-                    // Ignora a ocorrência de acordo com a tabela verdade
-                    if (k === 0) continue; // Ignora a primeira ocorrência
-
-                    // Substitui pelo índice
-                    copiaArray[posicoesDoSimbolo[k]] = j; // Usa o índice do símbolo
-                }
-            }
-        }
-
-        // Transforma a cópia em uma string e adiciona ao array de resultados
-        const resultadoFinal = copiaArray.join('');
-        if (!resultados.includes(resultadoFinal)) {
-            resultados.push(resultadoFinal);
+    // Percorre a string e armazena as posições dos símbolos encontrados
+    for (let i = 0; i < semEspacos.length; i++) {
+        if (simbolos.includes(semEspacos[i])) {
+            posicoesSimbolos.push(i);
         }
     }
+    
+    const totalSimbolosEncontrados = posicoesSimbolos.length;
+  
+  // Gera todas as combinações possíveis
+  const totalCombinacoes = 1 << totalSimbolosEncontrados; // 2^totalSimbolosEncontrados
 
-    return resultados;
+  for (let i = 0; i < totalCombinacoes; i++) {
+      const copiaArray = Array.from(semEspacos);
+      
+      // Substitui de acordo com a combinação
+      for (let j = 0; j < totalSimbolosEncontrados; j++) {
+        if (i & (1 << j)) { // Verifica se o bit j está setado
+            const posicao = posicoesSimbolos[j];
+            copiaArray[posicao] = '0'; // Substitui o símbolo por '0'
+        }
+      }
+
+      // Transforma a cópia em uma string e adiciona ao array de resultados
+      resultados.push(copiaArray.join(''));
+  }
+
+  return resultados;
 }
    
 

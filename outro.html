@@ -294,8 +294,7 @@ h1 span {
 }
 
     </style>
-    
-
+<link rel = "stylesheet" href="expressaoNumerica.css">
 </head>
 <body>
     <div class="container">
@@ -484,8 +483,6 @@ const quadro = document.createElement('div');
         }
 
         function expressaoNumerica(){
-            
-            // Função para criar uma expressão numérica aleatória
             function gerarExpressao() {
     const operadores = ['+', '-', '*', '/'];
     const gerarNumero = () => Math.floor(Math.random() * 10) + 1;
@@ -499,100 +496,350 @@ const quadro = document.createElement('div');
     return parteChaves;
 }
 
-// Função para corrigir a expressão numérica
-function corrigirExpressao(expressao) {
-    const regexParentheses = /\(([^()]+)\)/;  // Expressão regular para encontrar o nível mais interno de parênteses
-    const regexBrackets = /\[([^[\]]+)\]/;  // Expressão regular para encontrar colchetes
-    const regexBraces = /\{([^{}]+)\}/;     // Expressão regular para encontrar chaves
 
-    let passos = [];
-    let expAtual = expressao;
+const simbolos = ['+', '-', '*', '/'];
 
-    // Função auxiliar para avaliar expressões simples
-    function avaliarExpressaoSimples(expr) {
-    const operadores = /([+\-*/])/;
-    let tokens = expr.split(operadores).map(t => t.trim());
-
-    while (tokens.includes('*') || tokens.includes('/')) {
-        for (let i = 0; i < tokens.length; i++) {
-            if (tokens[i] === '*' || tokens[i] === '/') {
-                const operador = tokens[i];
-                const resultado = operador === '*' 
-                    ? Number(tokens[i - 1]) * Number(tokens[i + 1])
-                    : Number(tokens[i - 1]) / Number(tokens[i + 1]);
-                tokens.splice(i - 1, 3, resultado.toString());
-                break;
-            }
-        }
-    }
-
-    while (tokens.includes('+') || tokens.includes('-')) {
-        for (let i = 0; i < tokens.length; i++) {
-            if (tokens[i] === '+' || tokens[i] === '-') {
-                const operador = tokens[i];
-                const resultado = operador === '+'
-                    ? Number(tokens[i - 1]) + Number(tokens[i + 1])
-                    : Number(tokens[i - 1]) - Number(tokens[i + 1]);
-                tokens.splice(i - 1, 3, resultado.toString());
-                break;
-            }
-        }
-    }
-
-    return tokens[0]; // Expressão final resolvida
+function isNumber(char) {
+    return /\d/.test(char) || (char === '-' && /^\d*$/.test(char));
 }
 
-    // Função para gerar todas as formas possíveis
-    function gerarPassosPossiveis(exp, regex) {
-        let match;
-        let formas = [];
+function cleanOperand(operand) {
+    // Remove parênteses, colchetes e chaves das extremidades do operando
+    return operand.replace(/[(){}\[\]]/g, '');
+}
 
-        while ((match = exp.match(regex)) !== null) {
-            const subExp = match[1];
-            const avaliado = avaliarExpressaoSimples(subExp);
-            
-            // Gerar uma nova expressão com a parte avaliada
-            const novaExp = exp.replace(regex, avaliado);
-            formas.push(novaExp);
+function resolveOperation(left, operator, right) {
 
-            exp = exp.replace(subExp, avaliado); // Para continuar a simplificação
-        }
+    // Limpa os operandos antes de fazer a operação
+    left = cleanOperand(left);
+    right = cleanOperand(right);
+    
+    // Converte para número (pode adicionar parseFloat se necessário)
+    left = parseFloat(left);
+    right = parseFloat(right);
 
-        return formas;
+    switch (operator) {
+        case '+':
+            return left + right;
+        case '-':
+            return left - right;
+        case '*':
+            return left * right;
+        case '/':
+            return right !== 0 ? left / right : null; // Verifica divisão por zero
+        default:
+            return null;
+    }
+}
+
+function isIsolatedNumber(chars, index) {
+    const leftChar = chars[index - 1];
+    const rightChar = chars[index + 1];
+
+    // Verifica se o caractere à esquerda é um bracket
+    if (leftChar === '{' || leftChar === '[' || leftChar === '(') {
+        return rightChar === '}' || rightChar === ']' || rightChar === ')';
     }
 
-    // Passo 1: Resolver expressões entre parênteses
-    let passosParenteses = gerarPassosPossiveis(expAtual, regexParentheses);
-    passos.push(...passosParenteses);
+    // Se o caractere à esquerda não é um bracket, mas é um número, verifique antes
+    if (isNumber(leftChar)) {
+        let prevChar = chars[index - 2];
+        if (prevChar && !isNumber(prevChar)) {
+            if (prevChar === '{' || prevChar === '[' || prevChar === '(') {
+                return rightChar === '}' || rightChar === ']' || rightChar === ')';
+            }
+        }
+    }
 
-    // Passo 2: Resolver expressões entre colchetes
-    passosParenteses.forEach(exp => {
-        let passosColchetes = gerarPassosPossiveis(exp, regexBrackets);
-        passos.push(...passosColchetes);
-    });
+    // Verifica se o caractere à direita é um bracket
+    if (rightChar === '}' || rightChar === ']' || rightChar === ')') {
+        return leftChar === '{' || leftChar === '[' || leftChar === '(';
+    }
 
-    // Passo 3: Resolver expressões entre chaves
-    passosParenteses.forEach(exp => {
-        let passosChaves = gerarPassosPossiveis(exp, regexBraces);
-        passos.push(...passosChaves);
-    });
+    // Se o caractere à direita não é um bracket, mas é um número, verifique depois
+    if (isNumber(rightChar)) {
+        let nextChar = chars[index + 2];
+        if (nextChar && !isNumber(nextChar)) {
+            if (nextChar === '}' || nextChar === ']' || nextChar === ')') {
+                return leftChar === '{' || leftChar === '[' || leftChar === '(';
+            }
+        }
+    }
 
-    return passos;
+    return false; // Se não é isolado
+}
+
+function isOperator(char) {
+    return simbolos.includes(char);
+}
+
+function findLeftOperand(chars, index, posicoesSimbolos) {
+    let left = '';
+    let k = index - 1;
+    let opened = 0; 
+    let operatorFound = false;
+
+    while (k >= 0) {
+        const char = chars[k];
+
+        if (char === ')' || char === ']' || char === '}') {
+            opened++;
+        } 
+
+        if (char === '(' || char === '[' || char === '{') {
+            opened--;
+        }
+
+        // Se encontrar um operador diferente de '-', interrompe a busca
+        if (isOperator(char)) {
+            if (char === '-' && !posicoesSimbolos.includes(k)) {
+                // Se for '-', inclui no operando e para
+                left = char + left;
+
+            }
+            operatorFound = true;
+            break;
+        }
+
+        left = char + left;
+        k--;
+    }
+
+    // Retorna o operando encontrado e o índice para continuar a partir daí
+    return { operand: left, index: k + 1 };
+}
+
+function findRightOperand(chars, index) {
+    let right = '';
+    let l = index + 1;
+    let opened = 0; 
+    let operatorFound = false;
+
+    while (l < chars.length) {
+        const char = chars[l];
+
+        if (char === '(' || char === '[' || char === '{') {
+            opened++;
+        } 
+
+        if (char === ')' || char === ']' || char === '}') {
+            opened--;
+        }
+
+        // Permitir que o sinal de menos faça parte do número
+        if (isOperator(char) && char !== '-') {
+            operatorFound = true;
+            break;
+        }
+
+        right += char;
+        l++;
+    }
+
+    if (operatorFound && opened > 0) {
+        return { operand: '', index: index };
+    }
+
+    return { operand: right, index: l };
+}
+
+
+
+
+function generateSteps(str) {
+    const semEspacos = str;
+    const resultados = [];
+    
+    // Conta quantos símbolos são encontrados na string
+    const posicoesSimbolos = [];
+    
+    // Percorre a string e armazena as posições dos símbolos encontrados
+    for (let i = 0; i < semEspacos.length; i++) {
+        if (isOperator(semEspacos[i])) {
+            posicoesSimbolos.push(i);
+        }
+    }
+
+
+    const totalSimbolosEncontrados = posicoesSimbolos.length;
+
+    // Se não há mais símbolos, não há mais operações para resolver
+    if (totalSimbolosEncontrados === 0) {
+        return []; // Retorna um array vazio para indicar o fim
+    }
+
+    // Gera todas as combinações possíveis
+    const totalCombinacoes = 1 << totalSimbolosEncontrados; // 2^totalSimbolosEncontrados
+
+    for (let i = 0; i < totalCombinacoes; i++) {
+        const copiaArray = Array.from(semEspacos);
+
+        // Substitui de acordo com a combinação
+        for (let j = 0; j < totalSimbolosEncontrados; j++) {
+            if (i & (1 << j)) { // Verifica se o bit j está setado
+                const posicao = posicoesSimbolos[j];
+
+                // Verificar números ao redor do operador e resolver operação
+                const leftData = findLeftOperand(copiaArray, posicao, posicoesSimbolos);
+                const rightData = findRightOperand(copiaArray, posicao);
+
+                const left = leftData.operand;
+                const right = rightData.operand;
+
+                //console.log (right);
+
+                if (left && right) {
+                    
+                        const result = resolveOperation(left, copiaArray[posicao], right);
+                    
+                    
+
+                    // Preenche os índices dos caracteres utilizados na operação com vazios ('')
+                    for (let k = leftData.index; k <= rightData.index; k++) {
+                        copiaArray[k] = ''; // Esvazia os índices
+                    }
+
+                    // Insere o resultado da operação nos índices esvaziados
+                    
+                    copiaArray[leftData.index] = result.toString();
+                    
+                
+                }
+            }
+        }
+        
+        // Transforma a cópia em uma string e adiciona ao array de resultados
+        resultados.push(copiaArray.join(''));
+    }
+
+    return resultados;
+}
+
+
+
+function recursiveSteps(expression) {
+    let currentExpression = expression;
+    let steps = [currentExpression];
+
+
+    while (simbolos.some(simbolo => currentExpression.includes(simbolo))) {
+        const newStep = generateSteps(currentExpression);
+        
+        if (newStep.length > 0) {
+            currentExpression = newStep[newStep.length - 1];
+
+            const remainingOperators = currentExpression.split('').filter(char => isOperator(char)).length;
+
+            
+         // Pega a última forma gerada
+            steps.push(currentExpression);
+
+            if (remainingOperators === 1) {
+                const operatorIndex = currentExpression.split('').findIndex(char => isOperator(char));
+
+                const leftData = findLeftOperand(currentExpression.split(''), operatorIndex, []);
+                const rightData = findRightOperand(currentExpression.split(''), operatorIndex);
+
+                // Se não houver left ou right, quebramos o ciclo
+                if (!leftData.operand || !rightData.operand) {
+                    break;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+
+
+    return steps;
 }
 
 // Exemplo de uso
 let expressao = gerarExpressao();
-console.log("Expressão original: ", expressao);
+let resultado = recursiveSteps(expressao);
 
-let passosCorrecao = corrigirExpressao(expressao);
-console.log("Passos de correção: ");
-passosCorrecao.forEach(passo => console.log(passo));
+console.log(resultado);
+// Exibindo os passos
 
+const quadro = document.createElement('div');
+            quadro.className = 'quadro';
 
+            // Adicionar o botão de retorno
+            const botaoRetorno = document.createElement('button');
+            botaoRetorno.className = 'botao retorno';
+            botaoRetorno.innerText = 'Retorno';
+            botaoRetorno.onclick = function() {
+                document.body.removeChild(quadro); // Remover o quadro
+            };
 
+            // Adicionar a string abaixo do botão de retorno
+            const mensagem = document.createElement('div');
+            const interval = 50;
 
+            function showText(el, text, interval){
+                const char = text.split("").reverse();
 
+                const typer = setInterval(()=> {
+                    if (!char.length){
+                        return clearInterval(typer);
+                    }
 
+                    const next = char.pop();
+
+                    el.innerHTML += next;
+                }, interval)
+            }
+
+            showText(mensagem, expressao, interval);
+            quadro.appendChild(botaoRetorno);
+            quadro.appendChild(mensagem);
+
+            // Adicionar o quadro ao corpo
+            document.body.appendChild(quadro);
+            console.log('Botão clicado!');
+
+            let currentIndex = 0;
+
+            const container = document.createElement('div');
+
+            function createEditableDiv(){
+                const div = document.createElement('div');
+                div.contentEditable = true;
+                div.classList.add('editable');
+                div.setAttribute('placeholder', 'digite aqui...');
+                div.addEventListener('keydown', function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        const userInput = div.textContent.trim();
+
+                        if (userInput === resultado[currentIndex]) {
+                            div.classList.remove('incorrect');
+                            div.classList.add('correct');
+                            div.contentEditable = false;
+
+                            const correctSymbol = document.createElement('span');
+                            correctSymbol.textContent = " ✔️"
+                            div.appendChild(correctSymbol);
+                            currentIndex++;
+
+                            if(currentIndex < resultado.length){
+                                createEditableDiv();
+                            }else{
+                                div.setAttribute('placeholder', 'Concluído!');
+                            }
+                        }else{
+
+                            div.classList.add('flash-red');
+                            setTimeout(() => div.classList.remove('flash-red'), 250); 
+                        }
+                    }
+                });
+                container.appendChild(div);
+                quadro.appendChild(container);
+                div.focus();
+            }
+
+            createEditableDiv();
 
 
 
@@ -701,15 +948,8 @@ const numTerms = getRandomInt(2, 10); // Número de termos na expressão
 const expression = generateExpression(numTerms);
 console.log(expression);
 
-const mathsteps = require('mathsteps');
 
-// Definir a equação
-let steps = mathsteps.solveEquation(expression);
-
-// Iterar sobre os passos
-steps.forEach((step, index) => {
-    console.log(`Passo ${index + 1}: ${step.oldEquation.ascii()} -> ${step.newEquation.ascii()}`);
-});
+// Definir a 
 
 
         

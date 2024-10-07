@@ -1,0 +1,28 @@
+.editable {
+    padding: 5px;
+    margin: 5px 0;
+    min-height: 20px;
+    outline: none;
+    width: 300px;
+    display: flex;
+    justify-content: center;  
+    text-align: center;
+}
+  
+  .correct {
+    border-color: green;
+    color: green;
+  }
+  
+  .flash-red {
+    animation: flash 0.25s;
+  }
+  
+  /* Animação de piscar */
+  @keyframes flash {
+    0% { color: inherit; }
+  25% { color: red; }
+  50% { color: inherit; }
+  75% { color: red; }
+  100% { color: inherit; }
+  }
