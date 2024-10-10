@@ -1,0 +1,31 @@
+.expressao {
+    display: flex;
+    align-items: center; /* Centraliza o sinal de igual verticalmente */
+    justify-content: center;
+    gap: 10px; /* Espaçamento entre as divs esquerda, igual e direita */
+}
+
+.esquerda, .direita {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.numerador, .denominador {
+    display: flex;
+    justify-content: center; /* Alinha os elementos numerador e denominador horizontalmente */
+}
+
+.igual {
+    font-size: 24px; /* Ajuste o tamanho do igual conforme necessário */
+}
+
+.numerador {
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+}
+
+.denominador {
+    padding-top: 5px;
+}

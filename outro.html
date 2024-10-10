@@ -119,12 +119,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             margin: 0;
             background-color: white; /* Mantendo fundo branco */
             flex-direction: column;
             position: relative;
-            overflow: hidden;
         }
 
         h1 {
@@ -295,6 +293,7 @@ h1 span {
 
     </style>
 <link rel = "stylesheet" href="expressaoNumerica.css">
+<link rel = "stylesheet" href="expressaoAlgebrica.css">
 </head>
 <body>
     <div class="container">
@@ -312,9 +311,24 @@ h1 span {
         </h1> <!-- Título adicionado -->
         <button class="botao" onclick="tabuada()">Tabuada</button> <!-- Botão alterado -->
         <div class="linha-inferior">
-            <button class="botao" onclick="expressaoNumerica()">Expressão numérica</button>
-            <button class="botao" onclick="expressaoAlgebrica()">Expressao Algébrica</button>
+            <button class="botao" >Soma</button>
+            <button class="botao" >Subtração</button>
         </div>
+        <div class="linha-inferior">
+            <button class="botao">Multiplicação</button>
+            <button class="botao">Divisão</button>
+        </div>
+        <button class="botao" onclick="expressaoNumerica()">Expressao Numérica</button> <!-- Botão alterado -->
+        <button class="botao">Fração</button> <!-- Botão alterado -->
+        <button class="botao" onclick="expressaoAlgebrica()">Expressao Algébrica</button> <!-- Botão alterado -->
+        <button class="botao">Sistemas</button> <!-- Botão alterado -->
+        <div class="linha-inferior">
+            <button class="botao">Potenciação</button>
+            <button class="botao">Radiciaçao</button>
+        </div>
+        <button class="botao">Logaritmo</button> <!-- Botão alterado -->
+        <button class="botao">Matriz</button> <!-- Botão alterado -->
+        
     </div>
     <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
     <script>
@@ -900,56 +914,100 @@ const quadro = document.createElement('div');
             };
 
             // Adicionar a string abaixo do botão de retorno
-            const mensagem = document.createElement('p');
-            mensagem.innerText = 'Aqui está a string que você pediu!';
+            const expressao = document.createElement('div');
+
+            function criarDivsComSinal(dados) {
+    // Criar div da esquerda
+   const {esquerda, direita} = dados;
+
+   function criarParteNumeradorDenominador(parte, classe) {
+        const divParte = document.createElement('div');
+        divParte.className = classe;
+
+        // Criar div do numerador
+        const divNumerador = document.createElement('div');
+        divNumerador.className = 'numerador';
+        parte.numerador.elementos.forEach(obj => {
+            const elemento = document.createElement('div');
+            elemento.innerText = obj.valor; // Supondo que cada objeto tenha um atributo 'valor'
+            divNumerador.appendChild(elemento);
+        });
+
+        // Criar div do denominador
+        const divDenominador = document.createElement('div');
+        divDenominador.className = 'denominador';
+        parte.denominador.elementos.forEach(obj => {
+            const elemento = document.createElement('div');
+            elemento.innerText = obj.valor; // Supondo que cada objeto tenha um atributo 'valor'
+            divDenominador.appendChild(elemento);
+        });
+
+        // Colocar o numerador e denominador na div correspondente (esquerda ou direita)
+        divParte.appendChild(divNumerador);
+        divParte.appendChild(divDenominador);
+
+        return divParte;
+    }
+
+    const divEsquerda = criarParteNumeradorDenominador(esquerda, 'esquerda');
+
+    // Criar div da direita
+    const divDireita = criarParteNumeradorDenominador(direita, 'direita');
+
+    const divIgual = document.createElement('span');
+    divIgual.innerText = ' = ';
+    divIgual.className = 'igual';
+
+    expressao.className = 'expressao';
+
+    // Adicionar as divs ao expressao
+    expressao.appendChild(divEsquerda);
+    expressao.appendChild(divIgual);
+    expressao.appendChild(divDireita);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
             quadro.appendChild(botaoRetorno);
-            quadro.appendChild(mensagem);
+            quadro.appendChild(expressao);
 
             // Adicionar o quadro ao corpo
             document.body.appendChild(quadro);
             console.log('Botão clicado!');
 
 
+            const dadosExemplo = {
+    esquerda: {
+        numerador: { elementos: [{ valor: 'a' }, { valor: 'b' }] },
+        denominador: { elementos: [{ valor: 'c' }, { valor: 'd' }] }
+    },
+    direita: {
+        numerador: { elementos: [{ valor: 'x' }, { valor: 'y' }] },
+        denominador: { elementos: [{ valor: 'z' }, { valor: 'w' }] }
+    }
+};
+
+            criarDivsComSinal(dadosExemplo);
         }
 
-            function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function getRandomOperator() {
-    const operators = ['+', '-', '*', '/'];
-    return operators[getRandomInt(0, operators.length - 1)];
-}
-
-function getRandomVariable() {
-    const variables = ['x', 'y'];
-    return variables[getRandomInt(0, variables.length - 1)];
-}
-
-function getRandomElement() {
-    const elements = [getRandomInt(1, 10), getRandomVariable()];
-    return elements[getRandomInt(0, elements.length - 1)];
-}
-
-function generateExpression(numTerms) {
-    let expression = getRandomElement().toString();
-    
-    for (let i = 1; i < numTerms; i++) {
-        const operator = getRandomOperator();
-        const nextElement = getRandomElement();
-        expression += ` ${operator} ${nextElement}`;
-    }
-    
-    return expression;
-}
-
-// Exemplo de uso:
-const numTerms = getRandomInt(2, 10); // Número de termos na expressão
-const expression = generateExpression(numTerms);
-console.log(expression);
-
-
-// Definir a 
+          
 
 
         
