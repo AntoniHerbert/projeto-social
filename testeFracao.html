@@ -1,282 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operações com Frações</title>
-    <style>
-        .fraction {
-            display: inline-block;
-            text-align: center;
-            margin: 10px;
-            vertical-align: middle;
-        }
-        .numerator, .denominator {
-            display: block;
-            width: 100%;
-        }
-        .fraction-line {
-            border-top: 1px solid black;
-            margin: 0.1em 0;
-        }
-        .operation {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .operator {
-            margin: 0 10px;
-            font-size: 20px;
-        }
-        .intermediate {
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        .container {
-            border: 1px dashed gray;
-            padding: 5px;
-            margin: 5px;
-            min-height: 40px;
-        }
-        .draggable {
-            background-color: lightblue;
-            border: 1px solid blue;
-            padding: 5px;
-            margin: 2px;
-            cursor: move;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Frações Arrastável</title>
+  <style>
+    .fraction { display: inline-block; margin: 20px; text-align: center; }
+    .slot { border: 1px solid black; width: 50px; height: 30px; display: flex; justify-content: center; align-items: center; margin: 2px; }
+    .numerator, .denominator { width: 100%; display: flex; justify-content: center; }
+    .draggable { cursor: pointer; padding: 5px; background-color: #ddd; border: 1px solid #888; margin: 2px; text-align: center; }
+    .operator { font-weight: bold; padding: 5px; }
+  </style>
 </head>
 <body>
-    <div id="output"></div>
-    <script>
-        // Classe Numero
-        class Numero {
-            constructor(valor, sinal) {
-                this.valor = valor;
-                this.sinal = sinal;
-            }
+  <h1>Calculadora de Frações</h1>
 
-            toString() {
-                return `${this.sinal}${this.valor}`;
-            }
-        }
+  <div id="fractions-container" style="display: flex;"></div>
 
-        // Classe Fracao
-        class Fracao {
-            constructor(numerador, denominador) {
-                this.numerador = numerador;
-                this.denominador = denominador;
-            }
+  <button onclick="generateFractions()">Gerar Frações</button>
+  <button onclick="resolveFractions()">Resolver</button>
 
-            toString() {
-                return `${this.numerador}/${this.denominador}`;
-            }
+  <script>
+    function getRandomNumber() {
+      return Math.floor(Math.random() * 10) + 1;
+    }
 
-            render() {
-                return `
-                    <div class="fraction">
-                        <div class="numerator">
-                            <div class="container draggable" draggable="true" id="numerador-${this.numerador}">${this.numerador}</div>
-                        </div>
-                        <div class="fraction-line"></div>
-                        <div class="denominator">
-                            <div class="container draggable" draggable="true" id="denominador-${this.denominador}">${this.denominador}</div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
+    function getRandomOperator() {
+      const operators = ["+", "-", "x", "÷"];
+      return operators[Math.floor(Math.random() * operators.length)];
+    }
 
-        // Classe Operador
-        class Operador {
-            constructor(esquerda, direita, tipo) {
-                this.esquerda = esquerda;
-                this.direita = direita;
-                this.tipo = tipo;
-            }
+    function createFraction(numerator, denominator) {
+      const fractionDiv = document.createElement("div");
+      fractionDiv.classList.add("fraction");
 
-            render() {
-                return `<div class="operator container">${this.tipo}</div>`;
-            }
-        }
+      const numDiv = createSlot(numerator);
+      numDiv.classList.add("numerator");
+      fractionDiv.appendChild(numDiv);
 
-        // Função para gerar números aleatórios
-        function gerarNumeroAleatorio() {
-            const valor = Math.floor(Math.random() * 101);  // Valor de 0 a 100
-            return new Numero(valor, '+');  // Sempre será positivo
-        }
+      const denDiv = createSlot(denominator);
+      denDiv.classList.add("denominator");
+      fractionDiv.appendChild(denDiv);
 
-        // Função para gerar uma fração a partir de dois números
-        function gerarFracao(numerador, denominador) {
-            return new Fracao(numerador, denominador);
-        }
+      return fractionDiv;
+    }
 
-        // Função para gerar um operador com tipos diferentes (+, -, *, /)
-        function gerarOperador(fracao1, fracao2) {
-            const operadores = ['+', '-', '*', '/'];
-            const tipo = operadores[Math.floor(Math.random() * operadores.length)];
-            return new Operador(fracao1, fracao2, tipo);
-        }
+    function createSlot(content) {
+      const slotDiv = document.createElement("div");
+      slotDiv.classList.add("slot");
+      slotDiv.setAttribute("ondrop", "drop(event)");
+      slotDiv.setAttribute("ondragover", "allowDrop(event)");
 
-        // Função para gerar uma operação
-        function gerarOperacao() {
-            const numeros = [];
-            for (let i = 0; i < 4; i++) {
-                numeros.push(gerarNumeroAleatorio());
-            }
+      if (content !== undefined) {
+        const element = createDraggable(content);
+        slotDiv.appendChild(element);
+      }
+      return slotDiv;
+    }
 
-            const fracao1 = gerarFracao(numeros[0].valor, numeros[1].valor);
-            const fracao2 = gerarFracao(numeros[2].valor, numeros[3].valor);
-            const operador = gerarOperador(fracao1, fracao2);
-            return [fracao1, operador, fracao2];
-        }
+    function createDraggable(content) {
+      const draggableDiv = document.createElement("div");
+      draggableDiv.classList.add("draggable");
+      draggableDiv.textContent = content;
+      draggableDiv.setAttribute("draggable", "true");
+      draggableDiv.setAttribute("ondragstart", "drag(event)");
+      return draggableDiv;
+    }
 
-        // Função para operar as frações e exibir o resultado no HTML
-        async function operar(operacao) {
-            const [fracao1, operador, fracao2] = operacao;
-            const outputDiv = document.getElementById('output');
-            
-            // Renderizar a operação inicial (fracao1 operador fracao2)
-            outputDiv.innerHTML += `
-                <div class="operation">
-                    ${fracao1.render()}
-                    ${operador.render()}
-                    ${fracao2.render()}
-                </div>
-            `;
+    function generateFractions() {
+      const container = document.getElementById("fractions-container");
+      container.innerHTML = ""; // Limpa frações anteriores
 
-            // Variáveis para armazenar resultados
-            let numeradorResultado;
-            let denominadorResultado;
+      // Fração 1
+      const numerator1 = getRandomNumber();
+      const denominator1 = getRandomNumber();
+      const fraction1 = createFraction(numerator1, denominator1);
+      container.appendChild(fraction1);
 
-            // Adiciona eventos de arrastar e soltar
-            const containers = outputDiv.querySelectorAll('.container');
-            containers.forEach(container => {
-                container.addEventListener('dragstart', dragStart);
-                container.addEventListener('dragover', dragOver);
-                container.addEventListener('drop', drop);
-            });
+      // Operador
+      const operator = getRandomOperator();
+      const operatorDiv = document.createElement("div");
+      operatorDiv.classList.add("operator");
+      operatorDiv.textContent = operator;
+      container.appendChild(operatorDiv);
 
-            function dragStart(event) {
-                event.dataTransfer.setData('text/plain', event.target.id);
-            }
+      // Fração 2
+      const numerator2 = getRandomNumber();
+      const denominator2 = getRandomNumber();
+      const fraction2 = createFraction(numerator2, denominator2);
+      container.appendChild(fraction2);
+    }
 
-            function dragOver(event) {
-                event.preventDefault();
-            }
+    function resolveFractions() {
+      const container = document.getElementById("fractions-container");
+      const [fraction1, operatorDiv, fraction2] = container.children;
+      const num1 = parseInt(fraction1.querySelector(".numerator .draggable").textContent);
+      const den1 = parseInt(fraction1.querySelector(".denominator .draggable").textContent);
+      const num2 = parseInt(fraction2.querySelector(".numerator .draggable").textContent);
+      const den2 = parseInt(fraction2.querySelector(".denominator .draggable").textContent);
+      const operator = operatorDiv.textContent;
 
-            async function drop(event) {
-                event.preventDefault();
-                const draggedId = event.dataTransfer.getData('text/plain');
-                const draggedElement = document.getElementById(draggedId);
-                const targetElement = event.target;
+      let resultNum, resultDen, intermediateNum, intermediateDen;
 
-                if (draggedElement && targetElement && targetElement.classList.contains('container')) {
-                    // Verifica se o alvo é um numerador ou denominador correspondente
-                    if (operador.tipo === '*' && targetElement.id.includes('numerador')) {
-                        const resultado = prompt(`Qual é o resultado da multiplicação ${fracao1.numerador} * ${fracao2.numerador}?`);
-                        if (resultado == fracao1.numerador * fracao2.numerador) {
-                            numeradorResultado = resultado;
-                            alert('Correto!');
-                        } else {
-                            alert('Tente novamente!');
-                        }
-                    } else if (operador.tipo === '*' && targetElement.id.includes('denominador')) {
-                        const resultado = prompt(`Qual é o resultado da multiplicação ${fracao1.denominador} * ${fracao2.denominador}?`);
-                        if (resultado == fracao1.denominador * fracao2.denominador) {
-                            denominadorResultado = resultado;
-                            alert('Correto!');
-                            mostrarResultado(numeradorResultado, denominadorResultado, 'Resultado da multiplicação:');
-                        } else {
-                            alert('Tente novamente!');
-                        }
-                    } else if (operador.tipo === '/') {
-                        // Lógica para divisão
-                        if (targetElement.id.includes('denominador')) {
-                            const resultadoMultiplicacao = prompt(`Qual é o resultado da multiplicação ${fracao1.numerador} * ${fracao2.denominador}?`);
-                            const resultadoDenominador = prompt(`Qual é o resultado da multiplicação ${fracao2.numerador} * ${fracao1.denominador}?`);
-                            if (resultadoMultiplicacao == fracao1.numerador * fracao2.denominador &&
-                                resultadoDenominador == fracao2.numerador * fracao1.denominador) {
-                                numeradorResultado = resultadoMultiplicacao;
-                                denominadorResultado = resultadoDenominador; // Aplica a operação de divisão
-                                alert('Correto!');
-                                mostrarResultado(numeradorResultado, denominadorResultado, 'Resultado da divisão:');
-                            } else {
-                                alert('Tente novamente!');
-                            }
-                        }
-                    } else if (operador.tipo === '+') {
-                        // Lógica para soma
-                        // Agora segue o fluxo correto
-                        if (targetElement.id.includes('numerador') && draggedElement.id.includes('numerador')) {
-                            const resultadoNumerador1 = prompt(`Qual é o resultado da multiplicação ${fracao1.numerador} * ${fracao2.denominador}?`);
-                            if (resultadoNumerador1 == fracao1.numerador * fracao2.denominador) {
-                                alert('Correto!');
+      if (operator === "x") {
+        resultNum = num1 * num2;
+        resultDen = den1 * den2;
+      } else if (operator === "÷") {
+        resultNum = num1 * den2;
+        resultDen = den1 * num2;
+      } else if (operator === "+" || operator === "-") {
+        intermediateDen = den1 * den2;
+        const n1 = num1 * den2;
+        const n2 = num2 * den1;
+        intermediateNum = `${n1} ${operator} ${n2}`;
+        resultNum = operator === "+" ? n1 + n2 : n1 - n2;
+        resultDen = intermediateDen;
 
-                                // Espera o usuário arrastar o outro numerador para o denominador
-                                const nextDropContainer = await esperarPorDrop(targetElement.id, 'denominador');
-                                const resultadoNumerador2 = prompt(`Qual é o resultado da multiplicação ${fracao2.numerador} * ${fracao1.denominador}?`);
-                                if (resultadoNumerador2 == fracao2.numerador * fracao1.denominador) {
-                                    alert('Correto!');
+        // Cria fração intermediária com numerador como `div` slot
+        const intermediateFraction = document.createElement("div");
+        intermediateFraction.classList.add("fraction");
 
-                                    // Espera o usuário arrastar um denominador para o outro denominador
-                                    await esperarPorDrop(nextDropContainer, 'denominador');
-                                    const resultadoDenominador = prompt(`Qual é o resultado da multiplicação ${fracao1.denominador} * ${fracao2.denominador}?`);
-                                    if (resultadoDenominador == fracao1.denominador * fracao2.denominador) {
-                                        alert('Correto!');
+        const intermediateNumDiv = document.createElement("div");
+        intermediateNumDiv.classList.add("slot"); // `div` slot para o numerador
+        intermediateNumDiv.setAttribute("ondrop", "drop(event)");
+        intermediateNumDiv.setAttribute("ondragover", "allowDrop(event)");
 
-                                        // Criar a fração intermediária com duas divs draggable
-                                        const fracaoIntermediaria = new Fracao(`${resultadoNumerador1}+${resultadoNumerador2}`, resultadoDenominador);
-                                        outputDiv.innerHTML += `
-                                            <div class="intermediate">Fração intermediária: ${fracaoIntermediaria.toString()}</div>
-                                        `;
+        // Adiciona `divs` arrastáveis separadas para n1 e n2 no numerador da fração intermediária
+        intermediateNumDiv.appendChild(createDraggable(n1));
+        intermediateNumDiv.appendChild(createOperator(operator));
+        intermediateNumDiv.appendChild(createDraggable(n2));
 
-                                        // Espera o usuário arrastar um elemento do numerador para o outro
-                                        const finalNumeradorContainer = await esperarPorDrop(`numerador-${resultadoNumerador1}`, 'numerador');
-                                        const resultadoFinal = prompt(`Qual é o resultado da soma ${resultadoNumerador1} + ${resultadoNumerador2}?`);
-                                        if (resultadoFinal == (parseInt(resultadoNumerador1) + parseInt(resultadoNumerador2))) {
-                                            alert('Correto!');
-                                            // Mostrar a fração final
-                                            outputDiv.innerHTML += `
-                                                <div class="final">Fração final: ${parseInt(resultadoNumerador1) + parseInt(resultadoNumerador2)}/${resultadoDenominador}</div>
-                                            `;
-                                        } else {
-                                            alert('Tente novamente!');
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        intermediateFraction.appendChild(intermediateNumDiv);
+        intermediateFraction.appendChild(createSlot(intermediateDen)); // Denominador intermediário
 
-            // Função para esperar pelo drop em um determinado container
-            function esperarPorDrop(containerId, tipo) {
-                return new Promise(resolve => {
-                    const container = document.getElementById(containerId);
-                    container.addEventListener('dragover', event => {
-                        event.preventDefault();
-                    });
-                    container.addEventListener('drop', event => {
-                        event.preventDefault();
-                        resolve(containerId);  // Resolve com o ID do container
-                    }, { once: true });  // Remove o evento após o primeiro drop
-                });
-            }
+        container.appendChild(document.createTextNode("Fração Intermediária:"));
+        container.appendChild(intermediateFraction);
+      }
 
-            function mostrarResultado(numerador, denominador, mensagem) {
-                const outputDiv = document.getElementById('output');
-                outputDiv.innerHTML += `
-                    <div class="result">${mensagem} ${numerador}/${denominador}</div>
-                `;
-            }
-        }
+      // Cria fração final
+      const resultFraction = createFraction(resultNum, resultDen);
+      container.appendChild(document.createTextNode("Resultado Final:"));
+      container.appendChild(resultFraction);
+    }
 
-        // Executar a operação ao carregar a página
-        const operacao = gerarOperacao();
-        operar(operacao);
-    </script>
+    function createOperator(operator) {
+      const operatorDiv = document.createElement("div");
+      operatorDiv.classList.add("operator");
+      operatorDiv.textContent = operator;
+      return operatorDiv;
+    }
+
+    function allowDrop(event) {
+      event.preventDefault();
+    }
+
+    function drag(event) {
+      event.dataTransfer.setData("text", event.target.textContent);
+    }
+
+    function drop(event) {
+      event.preventDefault();
+      const data = event.dataTransfer.getData("text");
+      event.target.innerHTML = ""; // Limpa o slot antes de adicionar o conteúdo arrastado
+      const newElement = createDraggable(data);
+      event.target.appendChild(newElement);
+    }
+  </script>
 </body>
 </html>
