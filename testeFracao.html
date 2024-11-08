@@ -15,52 +15,50 @@
 <body>
   <h1>Calculadora de Frações</h1>
 
-  <div id="fractions-container" style="display: flex;"></div>
-
-  <button onclick="generateFractions()">Gerar Frações</button>
-  <button onclick="resolveFractions()">Resolver</button>
+  <div id="fractions-container"></div>
 
   <script>
+    let currentOperator;
+
     function getRandomNumber() {
       return Math.floor(Math.random() * 10) + 1;
     }
 
     function getRandomOperator() {
       const operators = ["+", "-", "x", "÷"];
-      return operators[Math.floor(Math.random() * operators.length)];
+      currentOperator = operators[Math.floor(Math.random() * operators.length)];
+      return currentOperator;
     }
 
     function createFraction(numerator, denominator) {
       const fractionDiv = document.createElement("div");
       fractionDiv.classList.add("fraction");
 
-      const numDiv = createSlot(numerator);
-      numDiv.classList.add("numerator");
+      const numDiv = createSlot(numerator, "numerator");
       fractionDiv.appendChild(numDiv);
 
-      const denDiv = createSlot(denominator);
-      denDiv.classList.add("denominator");
+      const denDiv = createSlot(denominator, "denominator");
       fractionDiv.appendChild(denDiv);
 
       return fractionDiv;
     }
 
-    function createSlot(content) {
+    function createSlot(content, type) {
       const slotDiv = document.createElement("div");
-      slotDiv.classList.add("slot");
+      slotDiv.classList.add("slot", type);
       slotDiv.setAttribute("ondrop", "drop(event)");
       slotDiv.setAttribute("ondragover", "allowDrop(event)");
 
       if (content !== undefined) {
-        const element = createDraggable(content);
+        const element = createDraggable(content, type);
         slotDiv.appendChild(element);
       }
       return slotDiv;
     }
 
-    function createDraggable(content) {
+    function createDraggable(content, type) {
       const draggableDiv = document.createElement("div");
-      draggableDiv.classList.add("draggable");
+      draggableDiv.classList.add("draggable", type);
       draggableDiv.textContent = content;
       draggableDiv.setAttribute("draggable", "true");
       draggableDiv.setAttribute("ondragstart", "drag(event)");
@@ -71,34 +69,27 @@
       const container = document.getElementById("fractions-container");
       container.innerHTML = ""; // Limpa frações anteriores
 
-      // Fração 1
       const numerator1 = getRandomNumber();
       const denominator1 = getRandomNumber();
       const fraction1 = createFraction(numerator1, denominator1);
       container.appendChild(fraction1);
 
-      // Operador
       const operator = getRandomOperator();
       const operatorDiv = document.createElement("div");
       operatorDiv.classList.add("operator");
       operatorDiv.textContent = operator;
       container.appendChild(operatorDiv);
 
-      // Fração 2
       const numerator2 = getRandomNumber();
       const denominator2 = getRandomNumber();
       const fraction2 = createFraction(numerator2, denominator2);
       container.appendChild(fraction2);
+
+      resolveFractions(numerator1, denominator1, numerator2, denominator2, operator);
     }
 
-    function resolveFractions() {
+    function resolveFractions(num1, den1, num2, den2, operator) {
       const container = document.getElementById("fractions-container");
-      const [fraction1, operatorDiv, fraction2] = container.children;
-      const num1 = parseInt(fraction1.querySelector(".numerator .draggable").textContent);
-      const den1 = parseInt(fraction1.querySelector(".denominator .draggable").textContent);
-      const num2 = parseInt(fraction2.querySelector(".numerator .draggable").textContent);
-      const den2 = parseInt(fraction2.querySelector(".denominator .draggable").textContent);
-      const operator = operatorDiv.textContent;
 
       let resultNum, resultDen, intermediateNum, intermediateDen;
 
@@ -116,28 +107,25 @@
         resultNum = operator === "+" ? n1 + n2 : n1 - n2;
         resultDen = intermediateDen;
 
-        // Cria fração intermediária com numerador como `div` slot
         const intermediateFraction = document.createElement("div");
         intermediateFraction.classList.add("fraction");
 
         const intermediateNumDiv = document.createElement("div");
-        intermediateNumDiv.classList.add("slot"); // `div` slot para o numerador
+        intermediateNumDiv.classList.add("slot", "numerator");
         intermediateNumDiv.setAttribute("ondrop", "drop(event)");
         intermediateNumDiv.setAttribute("ondragover", "allowDrop(event)");
 
-        // Adiciona `divs` arrastáveis separadas para n1 e n2 no numerador da fração intermediária
-        intermediateNumDiv.appendChild(createDraggable(n1));
+        intermediateNumDiv.appendChild(createDraggable(n1, "numerator"));
         intermediateNumDiv.appendChild(createOperator(operator));
-        intermediateNumDiv.appendChild(createDraggable(n2));
+        intermediateNumDiv.appendChild(createDraggable(n2, "numerator"));
 
         intermediateFraction.appendChild(intermediateNumDiv);
-        intermediateFraction.appendChild(createSlot(intermediateDen)); // Denominador intermediário
+        intermediateFraction.appendChild(createSlot(intermediateDen, "denominator"));
 
         container.appendChild(document.createTextNode("Fração Intermediária:"));
         container.appendChild(intermediateFraction);
       }
 
-      // Cria fração final
       const resultFraction = createFraction(resultNum, resultDen);
       container.appendChild(document.createTextNode("Resultado Final:"));
       container.appendChild(resultFraction);
@@ -156,15 +144,56 @@
 
     function drag(event) {
       event.dataTransfer.setData("text", event.target.textContent);
+      event.dataTransfer.setData("type", event.target.classList.contains("numerator") ? "numerator" : "denominator");
     }
 
     function drop(event) {
       event.preventDefault();
-      const data = event.dataTransfer.getData("text");
-      event.target.innerHTML = ""; // Limpa o slot antes de adicionar o conteúdo arrastado
-      const newElement = createDraggable(data);
-      event.target.appendChild(newElement);
+      const draggedData = event.dataTransfer.getData("text");
+      const draggedType = event.dataTransfer.getData("type");
+
+      const targetType = event.target.classList.contains("numerator") ? "numerator" : "denominator";
+      const isValidDrop = validateDrop(draggedType, targetType, currentOperator);
+
+      if (isValidDrop) {
+        console.log(`Válido: ${draggedType} '${draggedData}' foi solto em ${targetType}`);
+        event.target.innerHTML = "";
+        const newElement = createDraggable(draggedData, targetType);
+        event.target.appendChild(newElement);
+      } else {
+        console.log(`Inválido: ${draggedType} '${draggedData}' não pode ser solto em ${targetType}`);
+      }
     }
+
+    function validateDrop(draggedType, targetType, operator) {
+      switch (operator) {
+        case "+":
+        case "-":
+          if (targetType === "denominator") {
+            return draggedType === "numerator" || draggedType === "denominator";
+          } else if (targetType === "numerator") {
+            return draggedType === "denominator";
+          }
+          break;
+        case "x":
+          if (targetType === "numerator") {
+            return draggedType === "numerator";
+          } else if (targetType === "denominator") {
+            return draggedType === "denominator";
+          }
+          break;
+        case "÷":
+          if (targetType === "numerator") {
+            return draggedType === "denominator";
+          } else if (targetType === "denominator") {
+            return draggedType === "numerator";
+          }
+          break;
+      }
+      return false;
+    }
+
+    window.onload = generateFractions;
   </script>
 </body>
 </html>
